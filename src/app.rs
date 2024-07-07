@@ -1,5 +1,4 @@
 use bevy::input::keyboard::*;
-use bevy::input::mouse::*;
 use bevy::input::InputPlugin;
 use bevy::prelude::*;
 
@@ -16,7 +15,7 @@ pub fn create_app() -> App {
     }
 
     app.add_systems(Startup, add_player);
-    app.add_systems(Update, respond_to_mouse);
+    app.add_systems(Update, respond_to_keyboard);
 
     // Do not do update, as this will disallow to do more steps
     // app.update(); //Don't!
@@ -36,21 +35,21 @@ fn add_player(mut commands: Commands) {
     ));
 }
 
-fn respond_to_mouse(
+fn respond_to_keyboard(
     mut query: Query<&mut Transform, With<Player>>,
-    mut mouse_motion_event: EventReader<MouseMotion>,
+    input: Res<ButtonInput<KeyCode>>,
 ) {
-    for event in mouse_motion_event.read() {
-        let mut player_position = query.single_mut();
-        player_position.translation.x += event.delta.x / 20.0;
-        player_position.translation.y -= event.delta.y / 20.0;
+    let mut player_position = query.single_mut();
+    if input.pressed(KeyCode::Space) {
+        // Do something
+        player_position.translation.x += 16.0;
     }
 }
 
 #[cfg(test)]
 pub fn count_n_players(app: &App) -> usize {
     let mut n = 0;
-    for c in app.world.components().iter() {
+    for c in app.world().components().iter() {
         if c.name().contains("::Player") {
             n += 1;
         }
@@ -63,26 +62,14 @@ fn get_player_position(app: &mut App) -> Vec3 {
     // Do 'app.update()' before calling this function,
     // else this assert goes off.
     assert_eq!(count_n_players(app), 1);
-    let mut query = app.world.query::<(&Transform, &Player)>();
-    let (transform, _) = query.single(&app.world);
+    let mut query = app.world_mut().query::<(&Transform, &Player)>();
+    let (transform, _) = query.single(app.world());
     transform.translation
-}
-
-#[cfg(test)]
-fn print_all_components_names(app: &App) {
-    for c in app.world.components().iter() {
-        println!("{}", c.name())
-    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_testing() {
-        assert_eq!(1 + 1, 2)
-    }
 
     #[test]
     fn test_can_create_app() {
@@ -119,7 +106,7 @@ mod tests {
     }
 
     #[test]
-    fn test_player_responds_to_mouse_move() {
+    fn test_player_responds_to_key_press() {
         let mut app = create_app();
         assert!(app.is_plugin_added::<InputPlugin>());
         app.update();
@@ -127,21 +114,14 @@ mod tests {
         // Not moved yet
         assert_eq!(Vec3::new(0.0, 0.0, 0.0), get_player_position(&mut app));
 
-        // Move the mouse
-        app.world.send_event(bevy::input::mouse::MouseMotion {
-            delta: Vec2::new(100.0, 100.0),
-        });
+        // Press the right arrow button, thanks Periwinkle
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Space);
 
         app.update();
 
         // Position must have changed now
         assert_ne!(Vec3::new(0.0, 0.0, 0.0), get_player_position(&mut app));
-    }
-
-    #[test]
-    fn test_print_all_components_names() {
-        let mut app = create_app();
-        app.update();
-        print_all_components_names(&app);
     }
 }
