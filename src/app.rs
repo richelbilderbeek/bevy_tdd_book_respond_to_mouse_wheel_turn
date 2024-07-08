@@ -1,4 +1,5 @@
 use bevy::input::keyboard::*;
+use bevy::input::mouse::*;
 use bevy::input::InputPlugin;
 use bevy::prelude::*;
 
@@ -15,7 +16,7 @@ pub fn create_app() -> App {
     }
 
     app.add_systems(Startup, add_player);
-    app.add_systems(Update, respond_to_keyboard);
+    app.add_systems(Update, respond_to_mouse_wheel_turn);
 
     // Do not do update, as this will disallow to do more steps
     // app.update(); //Don't!
@@ -35,12 +36,27 @@ fn add_player(mut commands: Commands) {
     ));
 }
 
-fn respond_to_keyboard(
+/*
+fn respond_to_mouse_wheel_turn(
     mut query: Query<&mut Transform, With<Player>>,
-    input: Res<ButtonInput<KeyCode>>,
+    input: Res<ButtonInput<MouseButton>>,
 ) {
-    let mut player_position = query.single_mut();
-    if input.pressed(KeyCode::Space) {
+    /*
+    if input.just_pressed(MouseButton::Other(())) {
+        let mut player_position = query.single_mut();
+        // Do something
+        player_position.translation.y += 16.0;
+    }
+    */
+}
+*/
+
+fn respond_to_mouse_wheel_turn(
+    mut query: Query<&mut Transform, With<Player>>,
+    mut mouse_wheel_event: EventReader<bevy::input::mouse::MouseWheel>,
+) {
+    for _event in mouse_wheel_event.read() {
+        let mut player_position = query.single_mut();
         // Do something
         player_position.translation.x += 16.0;
     }
@@ -70,6 +86,11 @@ fn get_player_position(app: &mut App) -> Vec3 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_testing() {
+        assert_eq!(1 + 1, 2)
+    }
 
     #[test]
     fn test_can_create_app() {
@@ -106,7 +127,7 @@ mod tests {
     }
 
     #[test]
-    fn test_player_responds_to_key_press() {
+    fn test_player_responds_to_mouse_wheel_turn() {
         let mut app = create_app();
         assert!(app.is_plugin_added::<InputPlugin>());
         app.update();
@@ -114,14 +135,16 @@ mod tests {
         // Not moved yet
         assert_eq!(Vec3::new(0.0, 0.0, 0.0), get_player_position(&mut app));
 
-        // Press the right arrow button, thanks Periwinkle
-        app.world_mut()
-            .resource_mut::<ButtonInput<KeyCode>>()
-            .press(KeyCode::Space);
-
+        // Scroll the mouse
+        app.world_mut().send_event(bevy::input::mouse::MouseWheel {
+            unit: MouseScrollUnit::Line,
+            x: 10.0,
+            y: 10.0,
+            window: Entity::PLACEHOLDER,
+        });
         app.update();
 
-        // Position must have changed now
+        // Moved now
         assert_ne!(Vec3::new(0.0, 0.0, 0.0), get_player_position(&mut app));
     }
 }
