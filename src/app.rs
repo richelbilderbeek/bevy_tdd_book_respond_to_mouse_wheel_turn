@@ -1,5 +1,3 @@
-use bevy::input::keyboard::*;
-use bevy::input::mouse::*;
 use bevy::input::InputPlugin;
 use bevy::prelude::*;
 

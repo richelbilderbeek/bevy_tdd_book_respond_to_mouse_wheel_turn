@@ -1,5 +1,5 @@
 [package]
-name = "bevy_tdd_book_respond_to_mouse_move"
+name = "bevy_tdd_book_respond_to_mouse_wheel_turn"
 version = "0.1.0"
 edition = "2021"
 
