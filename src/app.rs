@@ -126,7 +126,7 @@ mod tests {
 
         // Scroll the mouse
         app.world_mut().send_event(bevy::input::mouse::MouseWheel {
-            unit: MouseScrollUnit::Line,
+            unit: bevy::input::mouse::MouseScrollUnit::Line,
             x: 10.0,
             y: 10.0,
             window: Entity::PLACEHOLDER,
