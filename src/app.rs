@@ -52,23 +52,18 @@ fn count_n_players(app: &mut App) -> usize {
 }
 
 #[cfg(test)]
-fn get_player_position(app: &mut App) -> Vec3 {
+fn get_player_position(app: &mut App) -> Vec2 {
     // Do 'app.update()' before calling this function,
     // else this assert goes off.
     assert_eq!(count_n_players(app), 1);
     let mut query = app.world_mut().query::<(&Transform, &Player)>();
     let (transform, _) = query.single(app.world());
-    transform.translation
+    transform.translation.xy()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_testing() {
-        assert_eq!(1 + 1, 2)
-    }
 
     #[test]
     fn test_can_create_app() {
@@ -92,7 +87,7 @@ mod tests {
     fn test_player_is_at_origin() {
         let mut app = create_app();
         app.update();
-        assert_eq!(get_player_position(&mut app), Vec3::new(0.0, 0.0, 0.0));
+        assert_eq!(get_player_position(&mut app), Vec2::new(0.0, 0.0));
     }
 
     #[test]
@@ -102,7 +97,7 @@ mod tests {
         app.update();
 
         // Not moved yet
-        assert_eq!(Vec3::new(0.0, 0.0, 0.0), get_player_position(&mut app));
+        assert_eq!(Vec2::new(0.0, 0.0), get_player_position(&mut app));
 
         // Scroll the mouse
         app.world_mut().send_event(bevy::input::mouse::MouseWheel {
@@ -114,6 +109,6 @@ mod tests {
         app.update();
 
         // Moved now
-        assert_ne!(Vec3::new(0.0, 0.0, 0.0), get_player_position(&mut app));
+        assert_ne!(Vec2::new(0.0, 0.0), get_player_position(&mut app));
     }
 }
