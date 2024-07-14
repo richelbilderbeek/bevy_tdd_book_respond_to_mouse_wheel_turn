@@ -34,21 +34,6 @@ fn add_player(mut commands: Commands) {
     ));
 }
 
-/*
-fn respond_to_mouse_wheel_turn(
-    mut query: Query<&mut Transform, With<Player>>,
-    input: Res<ButtonInput<MouseButton>>,
-) {
-    /*
-    if input.just_pressed(MouseButton::Other(())) {
-        let mut player_position = query.single_mut();
-        // Do something
-        player_position.translation.y += 16.0;
-    }
-    */
-}
-*/
-
 fn respond_to_mouse_wheel_turn(
     mut query: Query<&mut Transform, With<Player>>,
     mut mouse_wheel_event: EventReader<bevy::input::mouse::MouseWheel>,
@@ -61,14 +46,9 @@ fn respond_to_mouse_wheel_turn(
 }
 
 #[cfg(test)]
-pub fn count_n_players(app: &App) -> usize {
-    let mut n = 0;
-    for c in app.world().components().iter() {
-        if c.name().contains("::Player") {
-            n += 1;
-        }
-    }
-    n
+fn count_n_players(app: &mut App) -> usize {
+    let mut query = app.world_mut().query::<&Player>();
+    return query.iter(app.world_mut()).len();
 }
 
 #[cfg(test)]
